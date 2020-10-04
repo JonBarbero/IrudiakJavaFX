@@ -1,0 +1,47 @@
+// Works with Gradle 5.7 and Java 12
+
+// To run this do:
+// ./gradlew run
+
+// To build a distribution zip:
+// ./gradlew distZip
+
+plugins {
+    id 'java'
+    id 'application'
+    id 'org.openjfx.javafxplugin' version '0.0.7'
+}
+
+sourceCompatibility = 11
+targetCompatibility = 11
+
+version = '0.0.1'
+group = 'ehu.isad'
+
+// ext.moduleName = 'gradlejavafxhelloworld'
+mainClassName = "$moduleName/ehu.isad.IrudiakFX"
+
+
+javafx {
+    version = "12"
+    modules = [ 'javafx.controls', 'javafx.fxml', 'javafx.swing', 'javafx.web']
+}
+
+
+repositories {
+    mavenCentral()
+}
+
+def newArgs = [ '--add-exports','java.desktop/com.apple.eawt=ALL-UNNAMED',]
+
+run {
+    inputs.property('moduleName', moduleName)
+    doFirst {
+        jvmArgs = jvmArgs + newArgs
+        jvmArgs = jvmArgs + ['--module-path', classpath.asPath,
+                             '--patch-module', "$moduleName=" + files(sourceSets.main.output.resourcesDir).asPath,
+                             '--module', "$mainClassName",
+        ]
+        classpath = files()
+    }
+}
